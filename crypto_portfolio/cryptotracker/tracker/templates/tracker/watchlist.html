@@ -1,0 +1,182 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block title %}Watchlist{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="header mb-4">
+    <h2 class="heading text-center" style="font-weight: 700; color: #1e293b;">
+      <span style="color: #3b82f6;">👁️</span> Your Watchlist
+    </h2>
+    <p class="text-center text-muted">Track your favorite cryptocurrencies in one place</p>
+  </div>
+
+  {% if coins %}
+  <div class="card shadow-sm rounded-lg overflow-hidden">
+    <div class="table-responsive">
+      <table class="crypto-table" style="width: 100%;">
+        <thead>
+          <tr>
+            <th style="width: 5%;">#</th>
+            <th style="width: 35%;">Coin</th>
+            <th style="width: 15%;">Symbol</th>
+            <th style="width: 15%;">Price</th>
+            <th style="width: 15%;">Change (24h)</th>
+            <th style="width: 15%;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for coin in coins %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+              <div class="coin-info">
+                <div class="coin-logo">
+                  <img src="{{ coin.iconUrl }}" alt="{{ coin.name }}" width="32" height="32">
+                </div>
+                <div style="font-weight: 600;">{{ coin.name }}</div>
+              </div>
+            </td>
+            <td style="color: #6b7280; font-weight: 500;">{{ coin.symbol }}</td>
+            <td style="font-weight: 600;">₹{{ coin.price|floatformat:2 }}</td>
+            <td>
+              {% if coin.change|floatformat >= 0 %}
+                <span class="positive" style="font-weight: 600;">▲ {{ coin.change|floatformat:2 }}%</span>
+              {% else %}
+                <span class="negative" style="font-weight: 600;">▼ {{ coin.change|floatformat:2 }}%</span>
+              {% endif %}
+            </td>
+            <td>
+              <form method="POST" action="{% url 'remove_from_watchlist' coin.uuid %}">
+                {% csrf_token %}
+                <button type="submit" class="sell-btn" style="width: 100%; padding: 8px 0;">
+                  <i class="bi bi-x-circle" style="margin-right: 5px;"></i> Remove
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state" style="text-align: center; padding: 50px 20px; background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <div style="font-size: 64px; margin-bottom: 20px;">🔍</div>
+    <h3 style="color: #4b5563; margin-bottom: 15px;">Your watchlist is empty</h3>
+    <p style="color: #6b7280; margin-bottom: 25px;">You haven't added any cryptocurrencies to your watchlist yet.</p>
+    <a href="{% url 'dashboard' %}" class="buy-btn" style="padding: 10px 20px; text-decoration: none;">
+      Browse Cryptocurrencies
+    </a>
+  </div>
+  {% endif %}
+  
+  {% if coins %}
+  <div class="mt-4 text-center">
+    <a href="{% url 'dashboard' %}" class="watch-btn" style="text-decoration: none; display: inline-block; padding: 10px 20px;">
+      <i class="bi bi-plus-circle" style="margin-right: 5px;"></i> Add More Coins
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+  .header {
+    margin-bottom: 30px;
+  }
+  
+  .crypto-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+  }
+  
+  .crypto-table th {
+    background-color: #f8fafc;
+    padding: 15px;
+    font-weight: 600;
+    color: #4b5563;
+    text-align: left;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  
+  .crypto-table td {
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+  
+  .crypto-table tr:hover {
+    background-color: #f9fafb;
+  }
+  
+  .coin-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .coin-logo img {
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .positive {
+    color: #10b981;
+  }
+  
+  .negative {
+    color: #ef4444;
+  }
+  
+  .buy-btn, .sell-btn, .watch-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .buy-btn {
+    background-color: #3b82f6;
+  }
+  
+  .buy-btn:hover {
+    background-color: #2563eb;
+  }
+  
+  .sell-btn {
+    background-color: #ef4444;
+  }
+  
+  .sell-btn:hover {
+    background-color: #dc2626;
+  }
+  
+  .watch-btn {
+    background-color: #10b981;
+  }
+  
+  .watch-btn:hover {
+    background-color: #059669;
+  }
+  
+  .empty-state {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+{% endblock %}

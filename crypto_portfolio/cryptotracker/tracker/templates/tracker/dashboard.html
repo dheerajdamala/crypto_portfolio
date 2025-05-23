@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Tracker Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9fafb;
+      color: #1f2937;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .nav a {
+      margin-right: 15px;
+      text-decoration: none;
+      color: #4b5563;
+      font-weight: 600;
+    }
+    .nav a:hover {
+      color: #3b82f6;
+    }
+    .search-bar {
+      padding: 10px;
+      width: 300px;
+      font-size: 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+    }
+    #searchHistory {
+      margin: 10px 0 20px;
+      font-size: 14px;
+      color: #6b7280;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    th {
+      background-color: #f3f4f6;
+      font-weight: 600;
+    }
+    .coin-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .coin-logo img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+    }
+    .positive { color: #10b981; }
+    .negative { color: #ef4444; }
+    .buy-btn, .sell-btn, .watch-btn, .currency-toggle {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .buy-btn { background-color: #3b82f6; }
+    .buy-btn:hover { background-color: #2563eb; }
+
+    .sell-btn { background-color: #ef4444; margin-left: 5px; }
+    .sell-btn:hover { background-color: #dc2626; }
+
+    .watch-btn { background-color: #10b981; margin-left: 5px; }
+    .watch-btn:hover { background-color: #059669; }
+    
+    .unwatch-btn { background-color: #584b33; margin-left: 5px; }
+    .unwatch-btn:hover { background-color: #403622; }
+    
+    .currency-toggle {
+      background-color: #6d28d9;
+      margin-left: 10px;
+    }
+    .currency-toggle:hover {
+      background-color: #5b21b6;
+    }
+    
+    .user-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      background-color: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 400px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close:hover {
+      color: black;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+    }
+    
+    .form-submit {
+      text-align: right;
+      margin-top: 20px;
+    }
+    
+    /* Messages styles */
+    .messages {
+      margin-bottom: 20px;
+    }
+    
+    .message {
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    
+    .success {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    
+    .error {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+    
+    .error-text {
+      color: #ef4444;
+      font-size: 0.85rem;
+      margin-top: 5px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Crypto Tracker</h1>
+    <div class="nav">
+      <a href="{% url 'dashboard' %}">Dashboard</a>
+      <a href="{% url 'portfolio' %}">Portfolio</a>
+      <a href="{% url 'transaction_history' %}">Transaction History</a>
+      <a href="{% url 'watchlist' %}">Watchlist</a>
+      <a href="{% url 'profile' %}">Profile</a>
+      <a href="{% url 'logout' %}">logout</a>
+      
+      
+    </div>
+  </div>
+
+  {% if messages %}
+  <div class="messages">
+    {% for message in messages %}
+    <div class="message {{ message.tags }}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+  <div class="user-panel">
+    <div>
+      <!- <span style="font-weight: 600;">Available Balance: <span id="availableBalance">{{ currency_symbol }}{{ user.profile.balance|floatformat:2 }}</span></span>
+      <form method="post" action="{% url 'toggle_currency' %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="currency-toggle">
+          Switch to {{ currency|default:"USD" }}{% if currency == "USD" %} | INR{% else %} | USD{% endif %}
+        </button>
+      </form>
+    </div>
+    <a href="{% url 'profile' %}" class="buy-btn">Add Money</a>
+  </div>
+  {% endif %}
+
+  <input type="text" id="searchInput" placeholder="Search coins..." class="search-bar">
+  <div id="searchHistory"></div>
+
+  <table id="cryptoTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Coin</th>
+        <th>Price ({{ currency|default:"USD" }})</th>
+        <th>24h %</th>
+        <th>Market Cap</th>
+        <th>Volume(24h)</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for coin in coins %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>
+          <div class="coin-info">
+            <div class="coin-logo"><img src="{{ coin.iconUrl }}" alt="{{ coin.name }}"></div>
+            <div>
+              <div>{{ coin.name }}</div>
+              <div style="color: #6b7280; font-size: 0.85rem;">{{ coin.symbol }}</div>
+            </div>
+          </div>
+        </td>
+        <td class="price">{{ currency_symbol }}{{ coin.price_converted|floatformat:2 }}</td>
+        <td class="{% if coin.change >= 0 %}positive{% else %}negative{% endif %}">
+          {% if coin.change >= 0 %}▲{% else %}▼{% endif %} {{ coin.change|floatformat:2 }}%
+        </td>
+        <td>{{ currency_symbol }}{{ coin.marketCap }}</td>
+        <td>{{ currency_symbol }}{{ coin.24hVolume }}</td>
+        <td>
+          {% if user.is_authenticated %}
+          <button type="button" class="buy-btn buy-crypto-btn" 
+            data-uuid="{{ coin.uuid }}" 
+            data-symbol="{{ coin.symbol }}" 
+            data-name="{{ coin.name }}" 
+            data-price="{{ coin.price }}"
+            data-price-converted="{{ coin.price_converted }}">Buy</button>
+          <button type="button" class="sell-btn sell-crypto-btn" 
+            data-uuid="{{ coin.uuid }}" 
+            data-symbol="{{ coin.symbol }}" 
+            data-name="{{ coin.name }}" 
+            data-price="{{ coin.price }}"
+            data-price-converted="{{ coin.price_converted }}">Sell</button>
+          {% if coin.uuid in watchlist_uuids %}
+          <form method="post" action="{% url 'remove_from_watchlist' coin.uuid %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="watch-btn" style="background-color: #584b33;">Unwatch</button>
+          </form>
+          {% else %}
+          <form method="post" action="{% url 'add_to_watchlist' coin.uuid %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="watch-btn">Watch</button>
+          </form>
+          {% endif %}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Buy Modal -->
+<div id="buyModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Buy <span id="buyModalCoinName"></span></h3>
+      <span class="close" id="closeBuyModal">&times;</span>
+    </div>
+    <form id="buyForm" method="post" action="{% url 'buy_crypto' %}">
+      {% csrf_token %}
+      <input type="hidden" id="buySymbol" name="symbol">
+      <input type="hidden" id="buyUuid" name="uuid">
+      <input type="hidden" name="currency" value="{{ currency|default:'USD' }}">
+      <div class="form-group">
+        <label for="buyPrice">Price ({{ currency_symbol }}):</label>
+        <input type="text" id="buyPrice" name="price" readonly>
+      </div>
+      <div class="form-group">
+        <label for="buyQuantity">Quantity:</label>
+        <input type="number" id="buyQuantity" name="quantity" min="0.001" step="0.001" required>
+        <div id="buyQuantityError" class="error-text"></div>
+      </div>
+      <div class="form-group">
+        <label for="buyTotal">Total Cost ({{ currency_symbol }}):</label>
+        <input type="text" id="buyTotal" name="total" readonly>
+        <div id="buyBalanceError" class="error-text"></div>
+      </div>
+      <div class="form-submit">
+        <button type="submit" class="buy-btn" id="confirmBuyBtn">Confirm Purchase</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Sell Modal -->
+<div id="sellModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Sell <span id="sellModalCoinName"></span></h3>
+      <span class="close" id="closeSellModal">&times;</span>
+    </div>
+    <form id="sellForm" method="post" action="{% url 'sell_crypto' %}">
+      {% csrf_token %}
+      <input type="hidden" id="sellSymbol" name="symbol">
+      <input type="hidden" id="sellUuid" name="uuid">
+      <input type="hidden" name="currency" value="{{ currency|default:'USD' }}">
+      <div class="form-group">
+        <label for="sellPrice">Price ({{ currency_symbol }}):</label>
+        <input type="text" id="sellPrice" name="price" readonly>
+      </div>
+      <div class="form-group">
+        <label for="sellQuantity">Quantity:</label>
+        <input type="number" id="sellQuantity" name="quantity" min="0.001" step="0.001" required>
+        <div id="sellQuantityError" class="error-text"></div>
+      </div>
+      <div class="form-group">
+        <label for="sellTotal">Total Return ({{ currency_symbol }}):</label>
+        <input type="text" id="sellTotal" name="total" readonly>
+      </div>
+      <div class="form-submit">
+        <button type="submit" class="sell-btn">Confirm Sale</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const searchHistoryDiv = document.getElementById('searchHistory');
+  const cryptoTable = document.getElementById('cryptoTable');
+  const balanceElement = document.getElementById('availableBalance');
+  
+  // Extract user balance from the DOM if available
+  let userBalance = 0;
+  if (balanceElement) {
+    const balanceText = balanceElement.textContent;
+    userBalance = parseFloat(balanceText.replace(/[^\d.-]/g, ''));
+  }
+  
+  // Modal references
+  const buyModal = document.getElementById('buyModal');
+  const sellModal = document.getElementById('sellModal');
+  const closeBuyModal = document.getElementById('closeBuyModal');
+  const closeSellModal = document.getElementById('closeSellModal');
+  
+  // Buy form elements
+  const buyForm = document.getElementById('buyForm');
+  const buyPrice = document.getElementById('buyPrice');
+  const buyQuantity = document.getElementById('buyQuantity');
+  const buyTotal = document.getElementById('buyTotal');
+  const buyUuid = document.getElementById('buyUuid');
+  const buySymbol = document.getElementById('buySymbol');
+  const buyModalCoinName = document.getElementById('buyModalCoinName');
+  const confirmBuyBtn = document.getElementById('confirmBuyBtn');
+  const buyBalanceError = document.getElementById('buyBalanceError');
+  const buyQuantityError = document.getElementById('buyQuantityError');
+  
+  // Sell form elements
+  const sellForm = document.getElementById('sellForm');
+  const sellPrice = document.getElementById('sellPrice');
+  const sellQuantity = document.getElementById('sellQuantity');
+  const sellTotal = document.getElementById('sellTotal');
+  const sellUuid = document.getElementById('sellUuid');
+  const sellSymbol = document.getElementById('sellSymbol');
+  const sellModalCoinName = document.getElementById('sellModalCoinName');
+  const sellQuantityError = document.getElementById('sellQuantityError');
+  
+  // Modal logic
+  document.querySelectorAll('.buy-crypto-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      const name = button.dataset.name;
+      const symbol = button.dataset.symbol;
+      const uuid = button.dataset.uuid;
+      // Use price_converted if available, otherwise fall back to price
+      const price = parseFloat(button.dataset.priceConverted || button.dataset.price).toFixed(2);
+  
+      buyModal.style.display = 'block';
+      buyModalCoinName.textContent = name + ' (' + symbol + ')';
+      buyUuid.value = uuid;
+      buySymbol.value = symbol;
+      buyPrice.value = price;
+      buyQuantity.value = '';
+      buyTotal.value = '';
+      
+      // Hide any previous error messages
+      buyBalanceError.style.display = 'none';
+      buyQuantityError.style.display = 'none';
+    });
+  });
+  
+  document.querySelectorAll('.sell-crypto-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      const name = button.dataset.name;
+      const symbol = button.dataset.symbol;
+      const uuid = button.dataset.uuid;
+      // Use price_converted if available, otherwise fall back to price
+      const price = parseFloat(button.dataset.priceConverted || button.dataset.price).toFixed(2);
+  
+      sellModal.style.display = 'block';
+      sellModalCoinName.textContent = name + ' (' + symbol + ')';
+      sellUuid.value = uuid;
+      sellSymbol.value = symbol;
+      sellPrice.value = price;
+      sellQuantity.value = '';
+      sellTotal.value = '';
+      
+      // Hide any previous error messages
+      sellQuantityError.style.display = 'none';
+    });
+  });
+  
+  closeBuyModal.onclick = () => buyModal.style.display = 'none';
+  closeSellModal.onclick = () => sellModal.style.display = 'none';
+  
+  window.onclick = function(event) {
+    if (event.target === buyModal) buyModal.style.display = 'none';
+    if (event.target === sellModal) sellModal.style.display = 'none';
+  };
+  
+  // Calculate total dynamically
+  buyQuantity.addEventListener('input', () => {
+    const quantity = parseFloat(buyQuantity.value || 0);
+    
+    // Validate quantity
+    if (quantity <= 0 || isNaN(quantity)) {
+      buyQuantityError.textContent = "Please enter a valid quantity";
+      buyQuantityError.style.display = 'block';
+      return;
+    } else {
+      buyQuantityError.style.display = 'none';
+    }
+    
+    const price = parseFloat(buyPrice.value);
+    const total = price * quantity;
+    buyTotal.value = total.toFixed(2);
+    
+    // Check if user has enough balance
+    if (total > userBalance) {
+      buyBalanceError.textContent = "Insufficient balance for this purchase";
+      buyBalanceError.style.display = 'block';
+    } else {
+      buyBalanceError.style.display = 'none';
+    }
+  });
+  
+  sellQuantity.addEventListener('input', () => {
+    const quantity = parseFloat(sellQuantity.value || 0);
+    
+    // Basic validation for quantity
+    if (quantity <= 0 || isNaN(quantity)) {
+      sellQuantityError.textContent = "Please enter a valid quantity";
+      sellQuantityError.style.display = 'block';
+      return;
+    } else {
+      sellQuantityError.style.display = 'none';
+    }
+    
+    const price = parseFloat(sellPrice.value);
+    const total = price * quantity;
+    sellTotal.value = total.toFixed(2);
+  });
+  
+  // Search functionality
+  const searchHistory = [];
+  
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.toLowerCase();
+    const rows = cryptoTable.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+  
+    Array.from(rows).forEach(row => {
+      const coinNameElement = row.querySelector('.coin-info div div');
+      const coinSymbolElement = row.querySelector('.coin-info div div:nth-child(2)');
+      
+      if (coinNameElement && coinSymbolElement) {
+        const coinName = coinNameElement.textContent.toLowerCase();
+        const coinSymbol = coinSymbolElement.textContent.toLowerCase();
+        
+        if (coinName.includes(query) || coinSymbol.includes(query)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      }
+    });
+  
+    if (query && !searchHistory.includes(query)) {
+      searchHistory.unshift(query);
+      if (searchHistory.length > 5) searchHistory.pop();
+      updateSearchHistory();
+    }
+  });
+  
+  function updateSearchHistory() {
+    searchHistoryDiv.innerHTML = `Recent searches: ${searchHistory.join(', ')}`;
+  }
+</script>
+</body>
+</html>

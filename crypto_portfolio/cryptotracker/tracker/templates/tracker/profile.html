@@ -1,0 +1,281 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}My Profile | Crypto Tracker{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+  <div class="profile-header">
+    <div class="avatar-container">
+      <div class="avatar">{{ user.username|first|upper }}</div>
+    </div>
+    <h1 class="heading">My Profile</h1>
+  </div>
+
+  <div class="profile-card">
+    <div class="user-info-section">
+      <h3>Account Information</h3>
+      
+      <div class="info-row">
+        <div class="info-label">Username</div>
+        <div class="info-value">{{ user.username }}</div>
+      </div>
+      
+      <div class="info-row">
+        <div class="info-label">Email</div>
+        <div class="info-value">{{ user.email }}</div>
+      </div>
+      
+      <div class="info-row">
+        <div class="info-label">Member Since</div>
+        <div class="info-value">{{ user.date_joined|date:"F j, Y" }}</div>
+      </div>
+
+      {% if balance is not None %}
+      <div class="info-row balance-row">
+        <div class="info-label">Available Balance</div>
+        <div class="info-value balance">₹{{ balance|floatformat:2 }}</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="funds-section">
+      <h3>Add Funds</h3>
+      <form method="POST" action="{% url 'add_money' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="amount">Amount ($)</label>
+          <div class="amount-input">
+            <span class="currency-symbol">$</span>
+            <input type="number" name="amount" id="amount" step="any" min="100" placeholder="1000" required>
+          </div>
+        </div>
+        
+        <div class="quick-amounts">
+          <span class="quick-amount" data-amount="1000">$1,000</span>
+          <span class="quick-amount" data-amount="5000">$5,000</span>
+          <span class="quick-amount" data-amount="10000">$10,000</span>
+        </div>
+        
+        <button type="submit" class="buy-btn add-funds-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 5px;">
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+          </svg>
+          Add Funds
+        </button>
+      </form>
+    </div>
+  </div>
+  
+  <div class="account-actions">
+    <a href="{% url 'portfolio' %}" class="action-link">View My Portfolio</a>
+    <a href="{% url 'watchlist' %}" class="action-link">Manage Watchlist</a>
+  </div>
+</div>
+
+<style>
+  .profile-container {
+    max-width: 750px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  
+  .avatar-container {
+    margin-right: 20px;
+  }
+  
+  .avatar {
+    width: 70px;
+    height: 70px;
+    background-color: #3b82f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+  }
+  
+  .profile-card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  
+  .user-info-section, .funds-section {
+    padding: 25px;
+  }
+  
+  .user-info-section h3, .funds-section h3 {
+    color: #1f2937;
+    margin-top: 0;
+    font-size: 18px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  
+  .info-label {
+    color: #6b7280;
+    font-weight: 500;
+  }
+  
+  .info-value {
+    color: #1f2937;
+    font-weight: 600;
+  }
+  
+  .balance-row {
+    background-color: #f0f9ff;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+    border: 1px solid #bae6fd;
+  }
+  
+  .balance {
+    color: #0284c7;
+    font-size: 18px;
+  }
+  
+  .divider {
+    height: 1px;
+    background-color: #e5e7eb;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #4b5563;
+    font-weight: 500;
+  }
+  
+  .amount-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .currency-symbol {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    font-weight: 500;
+  }
+  
+  input[type="number"] {
+    width: 100%;
+    padding: 12px 15px 12px 30px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.2s ease;
+  }
+  
+  input[type="number"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .quick-amounts {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .quick-amount {
+    background-color: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .quick-amount:hover {
+    background-color: #e2e8f0;
+  }
+  
+  .add-funds-btn {
+    width: 100%;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .account-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 15px 0;
+  }
+  
+  .action-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  
+  .action-link:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+  
+  /* Button styles from existing theme */
+  .buy-btn {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .buy-btn:hover {
+    background-color: #2563eb;
+  }
+</style>
+
+<script>
+  // Quick amount selector functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const quickAmounts = document.querySelectorAll('.quick-amount');
+    const amountInput = document.getElementById('amount');
+    
+    quickAmounts.forEach(btn => {
+      btn.addEventListener('click', function() {
+        amountInput.value = this.dataset.amount;
+      });
+    });
+  });
+</script>
+{% endblock %}

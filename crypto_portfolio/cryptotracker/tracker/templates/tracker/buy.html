@@ -1,0 +1,317 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}Buy {{ coin.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="back-nav">
+    <a href="{% url 'dashboard' %}" class="back-link">&larr; Back to Dashboard</a>
+  </div>
+  
+  <div class="buy-container">
+    <div class="coin-header">
+      <div class="coin-info">
+        <img src="{{ coin.iconUrl }}" alt="{{ coin.name }}" class="coin-logo">
+        <div class="coin-details">
+          <h1>Buy {{ coin.name }} ({{ coin.symbol }})</h1>
+          <div class="coin-price">Current Price: <span class="price-value">{{ currency_symbol }}{{ coin.price_converted|floatformat:2 }}</span></div>
+        </div>
+      </div>
+      <div class="coin-stats">
+        <div class="stat">
+          <span class="stat-label">24h Change:</span>
+          <span class="stat-value {% if coin.change >= 0 %}positive{% else %}negative{% endif %}">
+            {% if coin.change >= 0 %}▲{% else %}▼{% endif %} {{ coin.change|floatformat:2 }}%
+          </span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Market Cap:</span>
+          <span class="stat-value">{{ currency_symbol }}{{ coin.marketCap }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="transaction-card">
+      <div class="card-header">
+        <h2>Purchase Details</h2>
+        <div class="balance-info">Your Balance: <span class="balance-value">{{ currency_symbol }}{{ user_balance|floatformat:2 }}</span></div>
+      </div>
+      
+      <form method="post" action="{% url 'buy_crypto' %}" id="buyForm">
+        {% csrf_token %}
+        <input type="hidden" name="uuid" value="{{ coin.uuid }}">
+        <input type="hidden" name="symbol" value="{{ coin.symbol }}">
+        <input type="hidden" name="price" value="{{ coin.price_converted }}">
+        <input type="hidden" name="currency" value="{{ currency }}">
+        
+        <div class="form-group">
+          <label for="quantity">Quantity to Buy:</label>
+          <input type="number" id="quantity" name="quantity" step="0.000001" min="0.000001" required class="form-control">
+          <div class="error-message" id="quantityError"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="total">Total Cost ({{ currency_symbol }}):</label>
+          <input type="text" id="total" readonly class="form-control">
+          <div class="error-message" id="balanceError"></div>
+        </div>
+        
+        <div class="confirm-section">
+          <div class="disclaimer">
+            <p>Cryptocurrency prices may change rapidly. Your transaction will be processed at the current market price.</p>
+          </div>
+          <button type="submit" class="buy-btn" id="confirmBuyBtn">Confirm Purchase</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .back-nav {
+    margin-bottom: 20px;
+  }
+  
+  .back-link {
+    color: #4b5563;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .back-link:hover {
+    color: #3b82f6;
+  }
+  
+  .buy-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .coin-header {
+    padding: 20px;
+    border-bottom: 1px solid #edf2f7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .coin-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .coin-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+  }
+  
+  .coin-details h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .coin-price {
+    margin-top: 5px;
+    color: #4b5563;
+  }
+  
+  .price-value {
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .coin-stats {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+  
+  .positive {
+    color: #10b981;
+  }
+  
+  .negative {
+    color: #ef4444;
+  }
+  
+  .transaction-card {
+    padding: 20px;
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .card-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .balance-info {
+    color: #4b5563;
+  }
+  
+  .balance-value {
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #4b5563;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 5px;
+    display: none;
+  }
+  
+  .confirm-section {
+    margin-top: 30px;
+  }
+  
+  .disclaimer {
+    margin-bottom: 20px;
+    padding: 12px;
+    background-color: #f3f4f6;
+    border-radius: 4px;
+  }
+  
+  .disclaimer p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #4b5563;
+  }
+  
+  .buy-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .buy-btn:hover {
+    background-color: #2563eb;
+  }
+  
+  .buy-btn:disabled {
+    background-color: #93c5fd;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('quantity');
+    const totalInput = document.getElementById('total');
+    const quantityError = document.getElementById('quantityError');
+    const balanceError = document.getElementById('balanceError');
+    const confirmBtn = document.getElementById('confirmBuyBtn');
+    const currentPrice = parseFloat('{{ coin.price_converted }}');
+    const userBalance = parseFloat('{{ user_balance }}');
+    
+    // Calculate total on quantity change
+    quantityInput.addEventListener('input', calculateTotal);
+    
+    function calculateTotal() {
+      const quantity = parseFloat(quantityInput.value || 0);
+      
+      // Validate quantity
+      if (quantity <= 0 || isNaN(quantity)) {
+        quantityError.textContent = "Please enter a valid quantity";
+        quantityError.style.display = 'block';
+        totalInput.value = '';
+        confirmBtn.disabled = true;
+        return;
+      } else {
+        quantityError.style.display = 'none';
+      }
+      
+      // Calculate total
+      const total = currentPrice * quantity;
+      totalInput.value = total.toFixed(2);
+      
+      // Check if user has enough balance
+      if (total > userBalance) {
+        balanceError.textContent = "Insufficient balance for this purchase";
+        balanceError.style.display = 'block';
+        confirmBtn.disabled = true;
+      } else {
+        balanceError.style.display = 'none';
+        confirmBtn.disabled = false;
+      }
+    }
+    
+    // Form validation
+    document.getElementById('buyForm').addEventListener('submit', function(event) {
+      const quantity = parseFloat(quantityInput.value || 0);
+      const total = parseFloat(totalInput.value || 0);
+      
+      if (quantity <= 0 || isNaN(quantity)) {
+        quantityError.textContent = "Please enter a valid quantity";
+        quantityError.style.display = 'block';
+        event.preventDefault();
+        return false;
+      }
+      
+      if (total > userBalance) {
+        balanceError.textContent = "Insufficient balance for this purchase";
+        balanceError.style.display = 'block';
+        event.preventDefault();
+        return false;
+      }
+    });
+  });
+</script>
+{% endblock %}

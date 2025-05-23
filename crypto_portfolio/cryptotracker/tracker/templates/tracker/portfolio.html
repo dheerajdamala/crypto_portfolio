@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio - Crypto Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* Header styles */
+        header {
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-left: 30px;
+        }
+        
+        .nav-menu a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .nav-menu a.active {
+            color: #4285f4;
+            font-weight: 600;
+        }
+        
+        /* Summary cards */
+        .summary-section {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .summary-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-title {
+            color: #6c757d;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .profit {
+            color: #28a745;
+        }
+        
+        .profit-percent {
+            font-size: 18px;
+            margin-left: 5px;
+        }
+        
+        /* Assets section */
+        .assets-section {
+            margin-top: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        .assets-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .assets-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead th {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            font-weight: 600;
+            text-align: left;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tbody td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .asset-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .asset-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .asset-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .asset-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .asset-symbol {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .btn-buy {
+            background-color: #4285f4;
+            color: white;
+        }
+        
+        .btn-sell {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .profit-badge, .loss-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .profit-badge {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+        
+        .loss-badge {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .currency-toggle {
+            text-align: right;
+            margin-top: 20px;
+        }
+        
+        .btn-toggle {
+            background-color: transparent;
+            border: 1px solid #ddd;
+            color: #555;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        /* Alert styles */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Transaction forms */
+        .transaction-form {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .form-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .submit-btn {
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                padding: 15px;
+            }
+            
+            .nav-menu {
+                margin-top: 15px;
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .nav-menu li {
+                margin-left: 0;
+            }
+            
+            .summary-section {
+                grid-template-columns: 1fr;
+            }
+            
+            thead {
+                display: none;
+            }
+            
+            tbody tr {
+                display: block;
+                margin-bottom: 10px;
+                border-bottom: 2px solid #eee;
+            }
+            
+            tbody td {
+                display: block;
+                text-align: right;
+                padding: 10px 15px;
+                position: relative;
+            }
+            
+            tbody td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 15px;
+                font-weight: 600;
+                color: #6c757d;
+            }
+            
+            .asset-info {
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="{% url 'dashboard' %}" class="logo">My Portfolio</a>
+            <ul class="nav-menu">
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li><a href="{% url 'portfolio' %}" class="active">Portfolio</a></li>
+                <li><a href="{% url 'watchlist' %}">Watchlist</a></li>
+                <li><a href="{% url 'profile' %}">Profile</a></li>
+                <li><a href="{% url 'logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a></li>
+            </ul>
+            <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: none;">
+                {% csrf_token %}
+            </form>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Currency Toggle -->
+        <div class="currency-toggle">
+            <a href="{% url 'toggle_currency' %}" class="btn-toggle">
+                Switch to {{ currency|default:"USD" }}
+            </a>
+        </div>
+
+        <!-- Alert Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Summary Section -->
+        <section class="summary-section">
+            <div class="summary-card">
+                <div class="card-title">TOTAL PORTFOLIO VALUE</div>
+                <div class="card-value">{{ currency_symbol }}{{ total_value }}</div>
+            </div>
+
+            <div class="summary-card">
+                <div class="card-title">AVAILABLE BALANCE</div>
+                <div class="card-value">{{ currency_symbol }}{{ balance }}</div>
+            </div>
+
+            <div class="summary-card">
+                <div class="card-title">TOTAL PROFIT/LOSS</div>
+                <div class="card-value {% if is_total_profit %}profit{% else %}loss{% endif %}">
+                    {% if is_total_profit %}+{% else %}-{% endif %}{{ currency_symbol }}{{ total_profit_loss }}
+                    <span class="profit-percent">({% if is_total_profit %}+{% else %}-{% endif %}{{ total_profit_loss_percent }}%)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Assets Section -->
+        <section class="assets-section">
+            <div class="assets-header">
+                <h2>YOUR ASSETS</h2>
+            </div>
+
+            {% if portfolio %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ASSET</th>
+                            <th>QUANTITY</th>
+                            <th>AVG. BUY PRICE</th>
+                            <th>CURRENT PRICE</th>
+                            <th>PROFIT/LOSS</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in portfolio %}
+                            <tr>
+                                <td data-label="ASSET">
+                                    <div class="asset-info">
+                                        <div class="asset-icon">
+                                            {% if item.coin.image_url %}
+                                                <img src="{{ item.coin.image_url }}" alt="{{ item.coin.symbol }}">
+                                            {% else %}
+                                                <div style="background-color: #f0f0f0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                                    {{ item.coin.symbol|slice:":1" }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <div class="asset-name">{{ item.coin.name }}</div>
+                                            <div class="asset-symbol">{{ item.coin.symbol }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td data-label="QUANTITY">{{ item.quantity }}</td>
+                                <td data-label="AVG. BUY PRICE">{{ currency_symbol }}{{ item.avg_buy_price }}</td>
+                                <td data-label="CURRENT PRICE">{{ currency_symbol }}{{ item.current_price }}</td>
+                                <td data-label="PROFIT/LOSS">
+                                    <span class="{% if item.is_profit %}profit-badge{% else %}loss-badge{% endif %}">
+                                        {% if item.is_profit %}+{% else %}-{% endif %}{{ currency_symbol }}{{ item.profit_loss }} ({{ item.profit_loss_percent }}%)
+                                    </span>
+                                </td>
+                                <td data-label="ACTIONS">
+                                    <div class="actions">
+                                        <button type="button" class="btn btn-buy" onclick="toggleForm('buy', '{{ item.coin.symbol }}')">Buy</button>
+                                        <button type="button" class="btn btn-sell" onclick="toggleForm('sell', '{{ item.coin.symbol }}')">Sell</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Simple inline form for buying (initially hidden) -->
+                            <tr id="buy-form-{{ item.coin.symbol }}" style="display: none;">
+                                <td colspan="6">
+                                    <form action="{% url 'buy_crypto' %}" method="POST" class="transaction-form">
+                                        {% csrf_token %}
+                                        <div class="form-title">Buy {{ item.coin.symbol }}</div>
+                                        <input type="hidden" name="symbol" value="{{ item.coin.symbol }}">
+                                        <div class="form-group">
+                                            <label for="buyQuantity-{{ item.coin.symbol }}">Quantity</label>
+                                            <input type="number" id="buyQuantity-{{ item.coin.symbol }}" name="quantity" step="0.000001" min="0.000001" class="form-control" required>
+                                            <small style="color: #6c757d; margin-top: 5px; display: block;">Available Balance: {{ currency_symbol }}{{ balance }}</small>
+                                        </div>
+                                        <button type="submit" class="submit-btn">Buy</button>
+                                        <button type="button" onclick="toggleForm('buy', '{{ item.coin.symbol }}')" style="margin-left: 10px; background-color: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            
+                            <!-- Simple inline form for selling (initially hidden) -->
+                            <tr id="sell-form-{{ item.coin.symbol }}" style="display: none;">
+                                <td colspan="6">
+                                    <form action="{% url 'sell_crypto' %}" method="POST" class="transaction-form">
+                                        {% csrf_token %}
+                                        <div class="form-title">Sell {{ item.coin.symbol }}</div>
+                                        <input type="hidden" name="symbol" value="{{ item.coin.symbol }}">
+                                        <div class="form-group">
+                                            <label for="sellQuantity-{{ item.coin.symbol }}">Quantity</label>
+                                            <input type="number" id="sellQuantity-{{ item.coin.symbol }}" name="quantity" step="0.000001" min="0.000001" max="{{ item.quantity }}" value="{{ item.quantity }}" class="form-control" required>
+                                            <small style="color: #6c757d; margin-top: 5px; display: block;">Available: {{ item.quantity }}</small>
+                                        </div>
+                                        <button type="submit" class="submit-btn">Sell</button>
+                                        <button type="button" onclick="toggleForm('sell', '{{ item.coin.symbol }}')" style="margin-left: 10px; background-color: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div style="padding: 40px; text-align: center;">
+                    <p style="color: #6c757d; margin-bottom: 10px;">You don't have any assets in your portfolio yet.</p>
+                    <p><a href="{% url 'dashboard' %}" style="color: #4285f4; text-decoration: none;">Go to dashboard</a> to start investing.</p>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <script>
+        // Function to toggle buy/sell forms
+        function toggleForm(type, symbol) {
+            const formId = `${type}-form-${symbol}`;
+            const form = document.getElementById(formId);
+            
+            // Close all other open forms first
+            const allForms = document.querySelectorAll('[id$="-form-' + symbol + '"]');
+            allForms.forEach(otherForm => {
+                if (otherForm.id !== formId) {
+                    otherForm.style.display = 'none';
+                }
+            });
+            
+            // Toggle the selected form
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'table-row';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Optional: You can add initialization code here if needed
+        });
+    </script>
+</body>
+</html>
